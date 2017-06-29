@@ -1,0 +1,215 @@
+# Definitions of OBJECT CLASS and ATTRIBUTE TYPE for the Service Directory
+# in the InternetWide Architecture, or more specifically, the IdentityHub.
+#
+# Currently allocated as
+# ARPA2-Experimental-LDAP-SteamWorks-ServiceHub 
+# 1.3.6.1.4.1.44469.666.389.1.3
+#
+# From: Rick van Rein <rick@openfortress.nl>
+
+
+##
+## RESOURCE LABELLING AND ACCESS CONTROL
+##
+
+
+
+# resourceClassUUID describes what a resource looks like in
+# terms of a unique code.  Instances of resources may have
+# further identifiers in terms of a DoNAI.
+#
+# This attribute is a good candidate for equality indexing.
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.1
+        NAME 'resourceClassUUID'
+        DESC 'The UUID value for a resource class'
+	EQUALITY uuidMatch
+	ORDERING uuidOrderingMatch
+	SYNTAX 1.3.6.1.1.16.1
+	SINGLE-VALUE )
+
+# resourceInstanceUUID describes an instance code, always
+# within the scope of a given resourceClassUUID.
+#
+# When used extensively to distinguish within any given
+# resourceClassUUID, this attribute may be an interesting
+# candidate for equality indexing.
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.2
+        NAME 'resourceInstanceUUID'
+        DESC 'The UUID value for a resource instance'
+	EQUALITY uuidMatch
+	ORDERING uuidOrderingMatch
+	SYNTAX 1.3.6.1.1.16.1 )
+
+# accessControlList describes a number of properties in a
+# space separated string:
+#	lineno level[ selector...]
+# where lineno is a non-negative integer indicating the desired
+# order of processing, level is a required word starting with
+# a letter, and a series of 0 or more DoNAI Selectors indicates 
+# what to match against to reach the intended level.
+#
+# When no DoNAI Selector is used, it really means an empty list,
+# so no matches at all.  This may be useful for transient uses
+# and has not been assigned any special meaning.  It would be
+# really UNIXy, and really confusing, to use such a notation for
+# a default, for example.  This shall not be done because it is
+# quite possible to express defaults with catch-all Selectors.
+#
+# When the lineno matches but levels do not, the order of
+# processing is undefined.  This may be safe to use when there
+# is no overlap between DoNAI Selectors, but it is usually
+# better to avoid this form, and software may warn against it
+# as one way of handling this undefinedness.
+#
+# We shall be utterly lame and describe the syntax below as a
+# simple IA5String, though it is restricted to the above.
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.3
+	NAME 'accessControlList'
+	DESC 'ACL description in "lineno level[ selector...]" format'
+	EQUALITY caseIgnoreIA5Match
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+
+# accessControlInheritance references a more general node in
+# the directory from which fallback settings are inherited.
+# This could be used to reference an overarching definition
+# such as a class of usages, or it could be used to share an
+# access control profile.
+#
+# When using this, be very careful about the potential of
+# transitive inheritance.  This may or may not be desired in
+# any concrete application.
+#
+#RESERVED# attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.4 ...)
+
+
+# accessControlledObject is any object that employs
+# accessControlList attributes to indicate its intended access.
+# At least one such attribute must be present, even if it is
+# just a default, or just an empty list of DoNAI Selectors.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.7
+        NAME 'accessControlledObject'
+        DESC 'An object that may or resides under access control'
+	AUXILIARY
+        MUST ( accessControlList ) )
+
+# resourceObject is attached to any object that describes a
+# resource.  The additional attributes resourceClassUUID and
+# possibly resourceInstanceUUID are used to describe in detail
+# what the object is about.
+#
+# It makes no sense to specify a resourceInstanceUUID with also
+# indicating the containing resourceClassUUID, so this is not
+# permitted; without either, this additional class is also not
+# very helpful.
+#
+# Very often, a resourceObject will be an accessControlledObject,
+# but this is not required and certainly not enforced.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.8
+        NAME 'resourceObject'
+        DESC 'A description of a resource'
+	AUXILIARY
+	MUST ( resourceClassUUID )
+        MAY ( resourceInstanceUUID ) )
+
+# resourceRequirement is a reference from an object to a
+# resourceObject that it requires.  The reference is made
+# by UUID, rather than by DN, so as to allow for data
+# that spans across scopes of visibility.
+#
+# When combined with an accessControlList, it is up to the
+# application to decide whether these should be setup on the
+# referencing or referred object(s), or both.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.9
+        NAME 'resourceRequirement'
+        DESC 'A link to a required resourceObject'
+	AUXILIARY
+	MUST ( resourceClassUUID )
+        MAY ( resourceInstanceUUID ) )
+
+
+##
+## GROUPS, ROLES AND BIDIRECTIONAL ACKNOWLEDGEMENTS
+##
+
+
+#
+# We use bidirectional acknowledgements for group membership and
+# role occupancy because that allows us to divide an agreement of
+# membership in two independent pieces.  We lean on PulleyScript
+# to pull the two sides together and conclude when it exists.
+# This way, it is more straightforward to set access control on
+# objects being groups or roles, or partaking in them.
+#
+# Note that we took an easier route for pseudonyms; we use the
+# existing seeAlso attribute for that, and again require a
+# bidirectional agreement which also happens to allow us to
+# walk back and forth between pseudonyms.
+#
+
+
+#
+# There is one more thing to say.  In the IdentityHub, we create
+# a group specifically for each member, and we create a role
+# specifically for each occupant.  These hold one reference to
+# one user, which points back with the attributes and classes
+# defined below.
+#
+# We use the uid=xxx+yyy notation for both ends of this relation.
+# This is not enforced in the schema, but it is how we will use
+# it in the IdentityHub.  This means that on the two ends, we
+# shall create uid=nnn+mmm,uid=nnn and uid=xxx+yyy,uid=xxx
+# and point back and forth.  This is something we shall not
+# do for pseudonyms, there we have one-level userID values
+# so without the +label attachment: uid=xxx and uid=zzz have
+# bidirectional references to one another.
+#
+# We shall lazily put only the RDN of the lowest node in the
+# DN-valued attributes.  Since this is our own internal format,
+# we are kings and this is how we shall rule... cheaply.
+#
+
+
+# membership references from a member of a group to the group
+# of which it is a member.  It is the reverse of the member
+# element in a groupOfNames.  We combine these bidirectional
+# references to confirm independenty the group membership.
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.10
+        NAME 'membership'
+        DESC 'Reference to a group of which we acknowledge membership'
+	SUP distinguishedName )
+
+# occupation references from a occupant of a role to the role
+# that it occupies.  It is the reverse of the roleOccupant
+# element in an organizationalRole.  We combine these
+# bidirectional references to confirm occupations independenty.
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.11
+        NAME 'occupation'
+        DESC 'Reference to a role of which we acknowledge it is our occupation'
+	SUP distinguishedName )
+
+# membershipObject is an object that holds a membership
+# attribute to reference its membership of a group.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.18
+        NAME 'membershipObject'
+        DESC 'A link to a group of which this object acknowledges membership'
+	AUXILIARY
+	MUST ( membership ) )
+
+# occupationObject is an object that holds an occupation
+# attribute to reference its occupation of a role.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.19
+        NAME 'occupationObject'
+        DESC 'A link to a role that this object acknowledges as its occupation'
+	AUXILIARY
+	MUST ( occupation ) )
+

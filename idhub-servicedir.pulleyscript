@@ -1,0 +1,69 @@
+# idhub-servicedio.pulleyscript
+#
+# This script pulls data from LDAP, and outputs pairs for the
+# relations that matter for the IdentityHub:
+#
+#  - pseudonym         for mutual seeAlso references
+#  - alias             for nested inetOrgPerson entries
+#  - group membership  for mutual member/membership
+#  - role occupancy    for mutual roleOccupant/occupation
+#
+# Somewhat more detail is in dit.graphml and dit.pdf
+#
+# From: Rick van Rein <rick@openfortress.nl>
+
+
+#
+# PSEUDONYMS: Find back-and-forth references with seeAlso
+#
+@idhub, AssociatedDomain=dom <- OU=IdentityHub,O=internetwide.org, OU=ServiceDIT, world
+
+Uid:pseudoLeft  + SeeAlso:pseudoToRight <- idhub
+Uid:pseudoRight + SeeAlso:pseudoToLeft  <- idhub
+
+#TODO# Comparing "john" to "uid=john" if we do it with seeAlso...
+(pseudoLeft  = pseudoToLeft )
+(pseudoRight = pseudoToRight)
+
+#TODO# Symmetric, so we find it in both directions
+# This is not a problem, as we don't expand pseudonyms beyond one step
+pseudoLeft,pseudoRight -> erlang_node ("noname@nonode", "pseudonym")
+
+
+#
+# ALIASES: Find uid=,uid= nesting
+#
+
+Uid:aliasName,Uid:aliasOrigin <- idhub
+
+aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
+
+
+#
+# GROUPS: Find pairs of member and membership
+#
+
+Uid=memberSubID + Membership:memberToGroup, Uid=memberUserID <- idhub
+Uid=groupSubID  + Member:groupToMember,     Uid=groupID      <- idhub
+
+#TODO# Probably need to unwrap RDN in attrs
+( memberSubID = groupToMember )
+( groupSubID  = memberToGroup )
+
+groupSubID,memberSubID -> erlang_node ("noname@nonode", "group")
+
+
+#
+# ROLES: Find pairs of roleOccupancy and occupation
+#
+
+Uid=occupantSubID + Occupation:occupantToRole,     Uid=occupantUserID <- idhub
+Uid=roleSubID     + roleOccupation:roleToOccupant, Uid=roleID         <- idhub
+
+#TODO# Probably need to unwrap RDN in attrs
+( occupantSubID = roleToOccupant )
+( roleSubID     = occupantToROle )
+
+roleSubID,occupantSubID -> erlang_node ("noname@nonode", "role")
+
+
