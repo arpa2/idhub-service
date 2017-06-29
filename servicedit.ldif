@@ -91,6 +91,9 @@ description: Authorisation details: users, groups, memberships, ...
 telephoneNumber: +3123456789
 labeledURI: http://internetwide.org Blog and Project Description
 labeledURI: http://internetwide.org/tag/architecture.html InternetWide Architecture
+associatedDomain: internetwide.org
+associatedDomain: arpa2.net
+associatedDomain: arpa2.org
 
 # The third level holds the services provided by a service provider.
 # These can be named as they like, where the only need is to keep
@@ -167,36 +170,26 @@ telephoneNumber: +3123456789
 #
 dn: uid=john,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: john
-objectClass: inetOrgPerson
-cn: John Doe
-seeAlso: uid=jojo
+objectClass: identityHubUser
 
-# Alias "john+cook" for user "john" is located under "john".
+# Alias "john+cook" for user "john" is located next to "john".
 # Note that the "+" character needs to be escaped as \2b in
-# distinguishedName notation.
+# distinguishedName notation.  It need not be interpreted by 
+# software (but is still helpful to users), as there is a
+# formal link to the original account made with uidAlias.
 #
-# We will write out the alias' uid in full, even if the hierarchy
-# contains it too.  Tools however, may not always be interested
-# in supporting such string processing.  It is a condition to a
-# correct ServiceDIT for IdentityHub that a uid=xxx+yyy,uid=xxx
-# form starts the lower node's uid with the higher node's uid
-# value and a plus sign, followed by at least one more character.
-#
-# The "memberOfGroup" reference indicates that "john+cook" is
-# willing to be a member of the "cook+john" group, again just
-# by mentioning the "uid=cook\2bjohn" RDN.  Group membership
-# will have to be confirmed on the other side too before it
-# is effective.
+# We will write out the alias' uid in full, simply to avoid the
+# need to encode such textual "standards", as well as to remain
+# flexible towards the future.
 #
 # This node is edited by IdentityHub software, which will only
 # let administrators for example.com edit it on top of
 # john@example.com and john\2bcook@example.com.
 #
-dn: uid=john\2bcook,uid=john,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+dn: uid=john\2bcook,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: john\2bcook
-objectClass: inetOrgPerson
-cn: John as a cook
-memberOfGroup: uid=cook\2bjohn
+objectClass: identityHubUser
+uidAlias: cook+john
 
 # User "jojo" is a user on its own, even when it is also a
 # pseudonym for user "john".  The pseudonym indicates that
@@ -207,39 +200,29 @@ memberOfGroup: uid=cook\2bjohn
 # This node is edited by IdentityHub software, which will only
 # let administrators for example.com edit it on top of
 # jojo@example.com.  Note that john@example.com is not
-# authorised, unless he changes his identity first or while
-# doing this (the web interface may tackle that, however).
-# Also note that seeAlso is yet another bidirectional
-# attribute, and that single-directional references don't
-# work.  We shall leave it to SteamWorks PulleyScript to
-# pair such events and come up with table insertions and
-# removals in response to the occurrence and disappearance
-# of such bidirectional references.
+# authorised to access resources that are accessible to
+# jojo@example.com,, unless he changes his identity first or
+# while accessing the resource (the web interface may tackle
+# that, however).
 #
 dn: uid=jojo,associatedDomain=example.com
 uid: jojo
-objectClass: inetOrgPerson
-cn: Jolly John
-telephoneNumber: +31534325306
-seeAlso: uid=john
+objectClass: identityHubUser
+uidPseudonym: john
 
-# Yet another alias, this time "jojo+beunhaas" under "jojo".
+# Yet another alias, this time "jojo+beunhaas" for "jojo".
 # This particular user object points to a role that it is
-# willing to occupy; as before, this requires ackowledgement
-# from both sides.
+# willing to occupy; to be effective, this needs both sides
+# to reference each other.
 #
-# TODO: There is no attribute like "occupation" that might
-# point to an occupationalRole object like "memberOfGroup"
-# will do for groups.
-#
-dn: uid=jojo\2bbeunhaas,uid=jojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+dn: uid=jojo\2bbeunhaas,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: jojo+beunhaas
-objectClass: inetOrgPerson
-# roleOccupant_reverse_eg_occupation: uid=codejockeys\2brooieduivel
+objectClass: identityHubUser
+uidRole: codejockeys+reddevil
 
 # The following defines a group "kookgroup", also using a uid
 # attribute because it functions like one.  The presence of the
-# objectClass "groupOfNames" indicates that this object is not
+# objectClass "uidGroupObject" indicates that this object is not
 # an individual but a group.  The "owner" attribute indicates
 # the owner (and administrator) of the group.
 #
@@ -254,14 +237,22 @@ objectClass: inetOrgPerson
 # there is a bidirectional link, and as empty uids will not be
 # inserted it will never happen that this leads to problems.
 #
-dn: uid=kookgroep,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
-uid: kookgroep
-objectClass: groupOfNames
-objectClass: uidObject
-cn: Kookgekken
-owner: uid=john\2badmin
-member: uid=cook\2bade
-member: uid=cook\2bjohn
+dn: uid=cook,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+uid: cook
+objectClass: identityHubGroup
+
+# Members of the aforementioned group, through an alias of the group
+dn: uid=cook\2bjohn,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+uid: cook+john
+objectClass: identityHubGroup
+uidAlias: cook
+uidMember: john+cook
+
+dn: uid=cook\2bade,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+uid: cook+ade
+objectClass: identityHubGroup
+uidAlias: cook
+uidMember: a3aan+cook
 
 # The following defines a role "codejockeys", recognised as a role
 # through the "organizationalRole" objectClass.  It is syntactically
@@ -272,16 +263,22 @@ member: uid=cook\2bjohn
 # bidirectional however, even when a role may provide rights instead
 # of assigning direct responsibilities.
 #
-# TODO: There is no standard attribute that indicates a role's owner.
-#       Are all role members equally capable?  Let's assume that for
-#       now, and perhaps we will add 
-#
 dn: uid=codejockeys,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: codejockeys
-class: organizationalRole
-class: uidObject
-roleOccupant: uid=codejockeys\2bjojo
-roleOccupant: uid=codejockeys\2ba3aan
+objectClass: identityHubRole
+
+# Role occupants of the aforementioned role, through an alias of the role
+dn: uid=codejockeys\2bjojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+uid: codejockeys+jojo
+objectClass: identityHubRole
+uidAlias: codejockeys
+uidOccupant: jojo+beunhaas
+
+dn: uid=codejockeys\2ba3aan,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+uid: codejockeys+a3aan
+objectClass: identityHubRole
+uidAlias: codejockeys
+uidOccupant: a3aan+tinkerbell
 
 # # Resources are modelled in the Service Directory for their ACLs.
 # #

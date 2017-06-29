@@ -24,23 +24,34 @@ olcAttributeTypes: {8}( 1.3.6.1.4.1.44469.666.389.1.3.9 NAME 'resourceInstance
 olcAttributeTypes: {9}( 1.3.6.1.4.1.44469.666.389.1.3.20 NAME 'accessControlLi
  st' DESC 'ACL description in "lineno level[ selector...]" format' EQUALITY ca
  seIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-olcObjectClasses: {0}( 1.3.6.1.4.1.44469.666.389.1.3.10 NAME 'identityHubUserI
- D' DESC 'A (user) identity under the IdentityHub Component of the InternetWid
- e Architecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym $ u
- idGroup $ uidRole $ uidMember $ uidOccupant $ uidDecline ) )
-olcObjectClasses: {1}( 1.3.6.1.4.1.44469.666.389.1.3.11 NAME 'resourceObject' 
- DESC 'A description of a resource' AUXILIARY MUST resourceClassUUID MAY resou
- rceInstanceUUID )
-olcObjectClasses: {2}( 1.3.6.1.4.1.44469.666.389.1.3.12 NAME 'resourceRequirem
+olcObjectClasses: {0}( 1.3.6.1.4.1.44469.666.389.1.3.10 NAME 'identityHubUser'
+  DESC 'An individual identity under the IdentityHub Component of the Internet
+ Wide Architecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym 
+ $ uidGroup $ uidRole $ uidDecline $ cn $ description $ labeledURI $ seeAlso )
+  )
+olcObjectClasses: {1}( 1.3.6.1.4.1.44469.666.389.1.3.11 NAME 'identityHubGroup
+ ' DESC 'A group identity under the IdentityHub Component of the InternetWide 
+ Architecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym $ uid
+ Group $ uidRole $ uidMember $ uidDecline $ cn $ description $ labeledURI $ se
+ eAlso ) )
+olcObjectClasses: {2}( 1.3.6.1.4.1.44469.666.389.1.3.12 NAME 'identityHubRole'
+  DESC 'A role identity under the IdentityHub Component of the InternetWide Ar
+ chitecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym $ uidGr
+ oup $ uidRole $ uidOccupant $ uidDecline $ cn $ description $ labeledURI $ se
+ eAlso ) )
+olcObjectClasses: {3}( 1.3.6.1.4.1.44469.666.389.1.3.15 NAME 'resourceObject' 
+ DESC 'A description of a resource' AUXILIARY MUST resourceClassUUID MAY ( res
+ ourceInstanceUUID $ cn $ description $ labeledURI $ seeAlso ) )
+olcObjectClasses: {4}( 1.3.6.1.4.1.44469.666.389.1.3.16 NAME 'resourceRequirem
  ent' DESC 'A link to a required resourceObject' AUXILIARY MUST resourceClassU
  UID MAY resourceInstanceUUID )
-olcObjectClasses: {3}( 1.3.6.1.4.1.44469.666.389.1.3.29 NAME 'accessControlled
+olcObjectClasses: {5}( 1.3.6.1.4.1.44469.666.389.1.3.29 NAME 'accessControlled
  Object' DESC 'An object that may or resides under access control' AUXILIARY M
  UST accessControlList )
 structuralObjectClass: olcSchemaConfig
-entryUUID: dd2bf37e-f125-1036-805e-09c69123dc04
+entryUUID: 6276bc7c-f12a-1036-87b5-6b1af2b971bd
 creatorsName: cn=config
-createTimestamp: 20170629144914Z
-entryCSN: 20170629144914.407290Z#000000#000#000000
+createTimestamp: 20170629152136Z
+entryCSN: 20170629152136.020874Z#000000#000#000000
 modifiersName: cn=config
-modifyTimestamp: 20170629144914Z
+modifyTimestamp: 20170629152136Z

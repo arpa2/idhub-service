@@ -35,6 +35,9 @@
 # used in spite of it being superfluous; so the object with RDN uid=xxx+yyy
 # will contain the uidAlias=xxx attribute to accommodate search tools.
 #
+# It is an error to specify a uidAlias if not both are identityHubUser
+# or both are identityHubGroup or both are identityHubRole.
+#
 # uidAlias is not usually bidirectional; it is considered valid only when
 # the owner of the two objects is the same party (which software may
 # choose to check or ignore, but formally that's how it works).
@@ -149,16 +152,41 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.9
 	SYNTAX 1.3.6.1.1.16.1 )
 
 
-# identityHubUserID is an object that describes users, groups and so on.
+# identityHubUser is an object that describes users, as in, individuals.
 # The general idea is to describe authorisation relations, which is why
 # there may often be ACLs attached to regulate editing, reading and so on.
 #
 objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.10
-        NAME 'identityHubUserID'
-        DESC 'A (user) identity under the IdentityHub Component of the InternetWide Architecture'
+        NAME 'identityHubUser'
+        DESC 'An individual identity under the IdentityHub Component of the InternetWide Architecture'
 	SUP top STRUCTURAL
         MUST ( uid )
-	MAY ( uidAlias $ uidPseudonym $ uidGroup $ uidRole $ uidMember $ uidOccupant $ uidDecline ) )
+	MAY ( uidAlias $ uidPseudonym $ uidGroup $ uidRole $ uidDecline $
+	      cn $ description $ labeledURI $ seeAlso ) )
+
+# identityHubGroup is an object that describes groups of users and groups.
+# The general idea is to describe authorisation relations, which is why
+# there may often be ACLs attached to regulate editing, reading and so on.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.11
+        NAME 'identityHubGroup'
+        DESC 'A group identity under the IdentityHub Component of the InternetWide Architecture'
+	SUP top STRUCTURAL
+        MUST ( uid )
+	MAY ( uidAlias $ uidPseudonym $ uidGroup $ uidRole $ uidMember $ uidDecline $
+	      cn $ description $ labeledURI $seeAlso ) )
+
+# identityHubRole is an object that describes roles, usually granted permissions.
+# The general idea is to describe authorisation relations, which is why
+# there may often be ACLs attached to regulate editing, reading and so on.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.12
+        NAME 'identityHubRole'
+        DESC 'A role identity under the IdentityHub Component of the InternetWide Architecture'
+	SUP top STRUCTURAL
+        MUST ( uid )
+	MAY ( uidAlias $ uidPseudonym $ uidGroup $ uidRole $ uidOccupant $ uidDecline $
+	      cn $ description $ labeledURI $ seeAlso ) )
 
 # resourceObject is attached to any object that describes a
 # resource.  The additional attributes resourceClassUUID and
@@ -173,12 +201,13 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.10
 # Very often, a resourceObject will be an accessControlledObject,
 # but this is not required and certainly not enforced.
 #
-objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.11
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.15
         NAME 'resourceObject'
         DESC 'A description of a resource'
 	AUXILIARY
 	MUST ( resourceClassUUID )
-        MAY ( resourceInstanceUUID ) )
+        MAY ( resourceInstanceUUID $
+	      cn $ description $ labeledURI $ seeAlso ) )
 
 # resourceRequirement is a reference from an object to a
 # resourceObject that it requires.  The reference is made
@@ -189,7 +218,7 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.11
 # application to decide whether these should be setup on the
 # referencing or referred object(s), or both.
 #
-objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.12
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.16
         NAME 'resourceRequirement'
         DESC 'A link to a required resourceObject'
 	AUXILIARY
