@@ -1,40 +1,46 @@
 dn: cn={0}arpa2-servicedir
 objectClass: olcSchemaConfig
 cn: {0}arpa2-servicedir
-olcAttributeTypes: {0}( 1.3.6.1.4.1.44469.666.389.1.3.1 NAME 'resourceClassUUI
+olcAttributeTypes: {0}( 1.3.6.1.4.1.44469.666.389.1.3.1 NAME 'uidAlias' DESC '
+ Reference to a uid of which we acknowledge being an alias' SUP uid )
+olcAttributeTypes: {1}( 1.3.6.1.4.1.44469.666.389.1.3.2 NAME 'uidPseudonym' DE
+ SC 'Reference to a user of which we acknowledge being a pseudonym' SUP uid )
+olcAttributeTypes: {2}( 1.3.6.1.4.1.44469.666.389.1.3.3 NAME 'uidGroup' DESC '
+ Reference to a group of which we acknowledge membership' SUP uid )
+olcAttributeTypes: {3}( 1.3.6.1.4.1.44469.666.389.1.3.4 NAME 'uidRole' DESC 'R
+ eference to a role of which we acknowledge being an occupant' SUP uid )
+olcAttributeTypes: {4}( 1.3.6.1.4.1.44469.666.389.1.3.5 NAME 'uidMember' DESC 
+ 'Reference to a member that we acknowledge in this group' SUP uid )
+olcAttributeTypes: {5}( 1.3.6.1.4.1.44469.666.389.1.3.6 NAME 'uidOccupant' DES
+ C 'Reference to a member that we acknowledge in this group' SUP uid )
+olcAttributeTypes: {6}( 1.3.6.1.4.1.44469.666.389.1.3.7 NAME 'uidDecline' DESC
+  'Reference to a member that we acknowledge in this group' SUP uid )
+olcAttributeTypes: {7}( 1.3.6.1.4.1.44469.666.389.1.3.8 NAME 'resourceClassUUI
  D' DESC 'The UUID value for a resource class' EQUALITY uuidMatch ORDERING uui
  dOrderingMatch SYNTAX 1.3.6.1.1.16.1 SINGLE-VALUE )
-olcAttributeTypes: {1}( 1.3.6.1.4.1.44469.666.389.1.3.2 NAME 'resourceInstance
+olcAttributeTypes: {8}( 1.3.6.1.4.1.44469.666.389.1.3.9 NAME 'resourceInstance
  UUID' DESC 'The UUID value for a resource instance' EQUALITY uuidMatch ORDERI
  NG uuidOrderingMatch SYNTAX 1.3.6.1.1.16.1 )
-olcAttributeTypes: {2}( 1.3.6.1.4.1.44469.666.389.1.3.3 NAME 'accessControlLis
- t' DESC 'ACL description in "lineno level[ selector...]" format' EQUALITY cas
- eIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
-olcAttributeTypes: {3}( 1.3.6.1.4.1.44469.666.389.1.3.10 NAME 'membership' DES
- C 'Reference to a group of which we acknowledge membership' SUP distinguished
- Name )
-olcAttributeTypes: {4}( 1.3.6.1.4.1.44469.666.389.1.3.11 NAME 'occupation' DES
- C 'Reference to a role of which we acknowledge it is our occupation' SUP dist
- inguishedName )
-olcObjectClasses: {0}( 1.3.6.1.4.1.44469.666.389.1.3.7 NAME 'accessControlledO
- bject' DESC 'An object that may or resides under access control' AUXILIARY MU
- ST accessControlList )
-olcObjectClasses: {1}( 1.3.6.1.4.1.44469.666.389.1.3.8 NAME 'resourceObject' D
- ESC 'A description of a resource' AUXILIARY MUST resourceClassUUID MAY resour
- ceInstanceUUID )
-olcObjectClasses: {2}( 1.3.6.1.4.1.44469.666.389.1.3.9 NAME 'resourceRequireme
- nt' DESC 'A link to a required resourceObject' AUXILIARY MUST resourceClassUU
- ID MAY resourceInstanceUUID )
-olcObjectClasses: {3}( 1.3.6.1.4.1.44469.666.389.1.3.18 NAME 'membershipObject
- ' DESC 'A link to a group of which this object acknowledges membership' AUXIL
- IARY MUST membership )
-olcObjectClasses: {4}( 1.3.6.1.4.1.44469.666.389.1.3.19 NAME 'occupationObject
- ' DESC 'A link to a role that this object acknowledges as its occupation' AUX
- ILIARY MUST occupation )
+olcAttributeTypes: {9}( 1.3.6.1.4.1.44469.666.389.1.3.20 NAME 'accessControlLi
+ st' DESC 'ACL description in "lineno level[ selector...]" format' EQUALITY ca
+ seIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
+olcObjectClasses: {0}( 1.3.6.1.4.1.44469.666.389.1.3.10 NAME 'identityHubUserI
+ D' DESC 'A (user) identity under the IdentityHub Component of the InternetWid
+ e Architecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym $ u
+ idGroup $ uidRole $ uidMember $ uidOccupant $ uidDecline ) )
+olcObjectClasses: {1}( 1.3.6.1.4.1.44469.666.389.1.3.11 NAME 'resourceObject' 
+ DESC 'A description of a resource' AUXILIARY MUST resourceClassUUID MAY resou
+ rceInstanceUUID )
+olcObjectClasses: {2}( 1.3.6.1.4.1.44469.666.389.1.3.12 NAME 'resourceRequirem
+ ent' DESC 'A link to a required resourceObject' AUXILIARY MUST resourceClassU
+ UID MAY resourceInstanceUUID )
+olcObjectClasses: {3}( 1.3.6.1.4.1.44469.666.389.1.3.29 NAME 'accessControlled
+ Object' DESC 'An object that may or resides under access control' AUXILIARY M
+ UST accessControlList )
 structuralObjectClass: olcSchemaConfig
-entryUUID: 1a5d6c2c-f113-1036-9430-9392d736524b
+entryUUID: dd2bf37e-f125-1036-805e-09c69123dc04
 creatorsName: cn=config
-createTimestamp: 20170629123456Z
-entryCSN: 20170629123456.633380Z#000000#000#000000
+createTimestamp: 20170629144914Z
+entryCSN: 20170629144914.407290Z#000000#000#000000
 modifiersName: cn=config
-modifyTimestamp: 20170629123456Z
+modifyTimestamp: 20170629144914Z
