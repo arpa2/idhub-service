@@ -1,0 +1,59 @@
+associatedDomain=example.com,ou=IdentityHub,o=internetwide.org
+dn: uid=john,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org
+uid: john
+objectClass: inetOrgPerson
+cn: John Doe
+telephoneNumber: +3123456789
+seeAlso: uid=jojo
+
+dn: uid=john+cook,uid=john,associatedDomain=example.com,...
+uid: john+cook
+objectClass: inetOrgPerson
+cn: John as a cook
+memberOfGroup: uid=cook+john
+
+dn: uid=jojo,associatedDomain=example.com
+uid: jojo
+objectClass: inetOrgPerson
+cn: Jolly John
+telephoneNumber: +31534325306
+
+dn: uid=john+beunhaas,uid=jojo,associatedDomain=example.com,...
+roleOccupant_reverse_eg_occupation: codejockeys+rooieduivel
+
+dn: uid=kookgroep,associatedDomain=example.com,...
+objectClass: groupOfNames
+objectClass: inetOrgPerson
+uid: kookgroep
+cn: Kookgekken
+owner: uid=john+admin
+member: 
+
+dn: uid=cook+ade,uid=kookgroep,...
+objectClass: groupOfNames
+member: uid=cook+ade
+cn: Kookgekken
+
+dn: uid=cook+john,uid=kookgroep,...
+objectClass: groupOfNames
+member: uid=cook+john
+cn: Kookgekken
+
+dn: uid=codejockeys,associatedDomain=example.com,...
+class: organizationalRole
+class: uidObject
+
+dn: uid=codejockeys+jojo,uid=codejockeys,associatedDomain=example.com,...
+class: organizationalRole
+class: uidObject
+uid: codejockeys
+roleOccupant: codejockeys+jojo
+roleOccupant: codejockeys+a3aan
+
+dn: resource_ofzo=,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org
+uuid: 1234-56-789012-3456
+
+TODO:
+ - groups, roles: list members / occupants
+
+
