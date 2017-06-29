@@ -40,8 +40,8 @@ dom,aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
 # GROUPS: Find pairs of uidMember and uidGroup
 #
 
-Uid=member + UidGroup:memberToGroup  <- idhub
-Uid=group  + UidMember:groupToMember <- idhub
+Uid:member + UidGroup:memberToGroup  <- idhub
+Uid:group  + UidMember:groupToMember <- idhub
 
 # Check that the identities are in bidirectional agreement
 ( member = groupToMember )
@@ -54,8 +54,8 @@ dom,group,member -> erlang_node ("noname@nonode", "group")
 # ROLES: Find pairs of uidOccupant and uidRole
 #
 
-Uid=occupant + UidRole:occupantToRole       <- idhub
-Uid=role     + UidOccupation:roleToOccupant <- idhub
+Uid:occupant + UidRole:occupantToRole       <- idhub
+Uid:role     + UidOccupation:roleToOccupant <- idhub
 
 # Check that the identities are in bidirectional agreement
 ( occupant = roleToOccupant )
