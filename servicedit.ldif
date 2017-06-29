@@ -222,20 +222,10 @@ uidRole: codejockeys+reddevil
 
 # The following defines a group "kookgroup", also using a uid
 # attribute because it functions like one.  The presence of the
-# objectClass "uidGroupObject" indicates that this object is not
-# an individual but a group.  The "owner" attribute indicates
-# the owner (and administrator) of the group.
-#
-# Note that the schema says that a groupOfNames MUST have at
-# least one member attribute.  Empty groups however, are a very
-# useful form, even if usually transient.  We shall capture
-# that special situation by allowing an empty member field.  In
-# most cases however, the owner will be setup as a group member,
-# so this may not even occur in practice.
-#
-# Note that members are only actually entered in a group when
-# there is a bidirectional link, and as empty uids will not be
-# inserted it will never happen that this leads to problems.
+# objectClass "identityHubGroup" indicates that this object is
+# not an individual but a group.  It is syntactically correct
+# to have such a group without uidMember attributes (unlike the
+# groupOfNames definition, strangely).
 #
 dn: uid=cook,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: cook
@@ -255,13 +245,8 @@ uidAlias: cook
 uidMember: a3aan+cook
 
 # The following defines a role "codejockeys", recognised as a role
-# through the "organizationalRole" objectClass.  It is syntactically
-# correct to define a role with zero "roleOccupant" references.
-#
-# TODO: There is no standard attribute that roleOccupants can use to
-# acknowledge that they have accepted a role.  We do like this to be
-# bidirectional however, even when a role may provide rights instead
-# of assigning direct responsibilities.
+# through the "identityHubRole" objectClass.  It is syntactically
+# correct to define a role with zero "uidOccupant" references.
 #
 dn: uid=codejockeys,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: codejockeys
@@ -280,6 +265,17 @@ objectClass: identityHubRole
 uidAlias: codejockeys
 uidOccupant: ade+tinkerbell
 
+# Resources represent a service in a general sense.  We describe one below.
+dn: cn=DMZ,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+cn: DMZ
+resourceClassUUID: 6B251E30-DF9C-4D62-8F5E-6D3F8CE7F839
+objectClass: resourceObject
+objectClass: ipNetwork
+ipNetworkNumber: 2001:db8:cafe:666::
+ipNetmaskNumber: /64
+description: Playground for scandalous behaviour
+manager: uid=john\2badmin,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+
 # # Resources are modelled in the Service Directory for their ACLs.
 # #
 # # TODO: Is this the best place for them?
@@ -289,13 +285,10 @@ uidOccupant: ade+tinkerbell
 # #       Syntax: http://www.faqs.org/rfcs/rfc4530.html
 # #
 # dn: resourceUUID=6B251E30-DF9C-4D62-8F5E-6D3F8CE7F839,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
-# resourceUUID: 6B251E30-DF9C-4D62-8F5E-6D3F8CE7F839
 # objectClass: resourceAccessARPA2
 
 # TODO:
-#  - roles: backrefs from role occupants
 #  - resources: here or elsewhere?
-#  - resources: UUID syntax?
 #  - resources: ACL attribute + object?
 #  - communication: ACL attribute + object?
 
