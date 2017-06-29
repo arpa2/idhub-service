@@ -235,8 +235,12 @@ objectClass: identityHubGroup
 dn: uid=cook\2bjohn,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: cook+john
 objectClass: identityHubGroup
+objectClass: accessControlledObject
 uidAlias: cook
 uidMember: john+cook
+accessControlList: 10 white a3aan+cook
+accessControlList: 20 gray cook@. cook+@. +cook@.
+accessControlList: 30 black @.
 
 dn: uid=cook\2bade,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: cook+ade
@@ -256,8 +260,12 @@ objectClass: identityHubRole
 dn: uid=codejockeys\2bjojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: codejockeys+reddevil
 objectClass: identityHubRole
+objectClass: accessControlledObject
 uidAlias: codejockeys
 uidOccupant: jojo+beunhaas
+accessControlList: 10 write codejockeys@.
+accessControlList: 20 read codejockeys+@.
+accessControlList: 30 visitor @.
 
 dn: uid=codejockeys\2ba3aan,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: codejockeys+a3aan
@@ -271,10 +279,14 @@ cn: DMZ
 resourceClassUUID: 6B251E30-DF9C-4D62-8F5E-6D3F8CE7F839
 objectClass: resourceObject
 objectClass: ipNetwork
+objectClass: accessControlledObject
 ipNetworkNumber: 2001:db8:cafe:666::
 ipNetmaskNumber: /64
 description: Playground for scandalous behaviour
 manager: uid=john\2badmin,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+accessControlList: 10 write john+badmin
+accessControlList: 20 read @
+accessControlList: 30 visitor @.
 
 # # Resources are modelled in the Service Directory for their ACLs.
 # #
@@ -288,8 +300,6 @@ manager: uid=john\2badmin,associatedDomain=example.com,ou=IdentityHub,o=internet
 # objectClass: resourceAccessARPA2
 
 # TODO:
-#  - resources: here or elsewhere?
-#  - resources: ACL attribute + object?
 #  - communication: ACL attribute + object?
 
 
