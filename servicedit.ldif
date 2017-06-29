@@ -205,7 +205,7 @@ uidAlias: cook+john
 # while accessing the resource (the web interface may tackle
 # that, however).
 #
-dn: uid=jojo,associatedDomain=example.com
+dn: uid=jojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: jojo
 objectClass: identityHubUser
 uidPseudonym: john
@@ -269,7 +269,7 @@ objectClass: identityHubRole
 
 # Role occupants of the aforementioned role, through an alias of the role
 dn: uid=codejockeys\2bjojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
-uid: codejockeys+jojo
+uid: codejockeys+reddevil
 objectClass: identityHubRole
 uidAlias: codejockeys
 uidOccupant: jojo+beunhaas
@@ -278,7 +278,7 @@ dn: uid=codejockeys\2ba3aan,associatedDomain=example.com,ou=IdentityHub,o=intern
 uid: codejockeys+a3aan
 objectClass: identityHubRole
 uidAlias: codejockeys
-uidOccupant: a3aan+tinkerbell
+uidOccupant: ade+tinkerbell
 
 # # Resources are modelled in the Service Directory for their ACLs.
 # #
