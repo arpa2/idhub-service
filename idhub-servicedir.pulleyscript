@@ -50,7 +50,7 @@ dom,aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
 Uid:member + UidGroup:group   <- idhub
 Uid:group  + UidMember:member <- idhub
 
-dom,group,member -> erlang_node ("noname@nonode", "group")
+dom,member,group -> erlang_node ("noname@nonode", "group")
 
 
 #
@@ -67,6 +67,23 @@ dom,group,member -> erlang_node ("noname@nonode", "group")
 Uid:occupant + UidRole:role           <- idhub
 Uid:role     + UidOccupation:occupant <- idhub
 
-dom,role,occupant -> erlang_node ("noname@nonode", "role")
+dom,occupant,role -> erlang_node ("noname@nonode", "role")
 
+
+#
+# COMMUNICATION: Locate each accessControlList next to a uid
+#
+
+Uid:communicator + accessControlList:acl <-- idhub
+
+dom,communicator,acl -> erlang_node ("noname@nonode", "communication")
+
+
+#
+# RESOURCE: Locate each accessControlList next to a resourceClassUUID
+#
+
+ResourceClassUUID:class + accessControlList:clsacl <-- idhub
+
+dom,class,acl -> erlang_node ("noname@nonode", "resource")
 
