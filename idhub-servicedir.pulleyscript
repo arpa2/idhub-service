@@ -40,12 +40,15 @@ dom,aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
 # GROUPS: Find pairs of uidMember and uidGroup
 #
 
-Uid:member + UidGroup:memberToGroup  <- idhub
-Uid:group  + UidMember:groupToMember <- idhub
+#OLDFASHIONED# Uid:member + UidGroup:memberToGroup  <- idhub
+#OLDFASHIONED# Uid:group  + UidMember:groupToMember <- idhub
+#OLDFASHIONED# 
+#OLDFASHIONED# # Check that the identities are in bidirectional agreement
+#OLDFASHIONED# ( member = groupToMember )
+#OLDFASHIONED# ( group  = memberToGroup )
 
-# Check that the identities are in bidirectional agreement
-( member = groupToMember )
-( group  = memberToGroup )
+Uid:member + UidGroup:group   <- idhub
+Uid:group  + UidMember:member <- idhub
 
 dom,group,member -> erlang_node ("noname@nonode", "group")
 
@@ -54,12 +57,15 @@ dom,group,member -> erlang_node ("noname@nonode", "group")
 # ROLES: Find pairs of uidOccupant and uidRole
 #
 
-Uid:occupant + UidRole:occupantToRole       <- idhub
-Uid:role     + UidOccupation:roleToOccupant <- idhub
+#OLDFASHIONED# Uid:occupant + UidRole:occupantToRole       <- idhub
+#OLDFASHIONED# Uid:role     + UidOccupation:roleToOccupant <- idhub
+#OLDFASHIONED# 
+#OLDFASHIONED# # Check that the identities are in bidirectional agreement
+#OLDFASHIONED# ( occupant = roleToOccupant )
+#OLDFASHIONED# ( role     = occupantToROle )
 
-# Check that the identities are in bidirectional agreement
-( occupant = roleToOccupant )
-( role     = occupantToROle )
+Uid:occupant + UidRole:role           <- idhub
+Uid:role     + UidOccupation:occupant <- idhub
 
 dom,role,occupant -> erlang_node ("noname@nonode", "role")
 
