@@ -187,7 +187,7 @@ objectClass: identityHubUser
 # john@example.com and john\2bcook@example.com.
 #
 dn: uid=john\2bcook,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
-uid: john\2bcook
+uid: john+cook
 objectClass: identityHubUser
 uidAlias: cook+john
 
@@ -257,7 +257,7 @@ uid: codejockeys
 objectClass: identityHubRole
 
 # Role occupants of the aforementioned role, through an alias of the role
-dn: uid=codejockeys\2bjojo,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
+dn: uid=codejockeys\2breddevil,associatedDomain=example.com,ou=IdentityHub,o=internetwide.org,ou=ServiceDIT
 uid: codejockeys+reddevil
 objectClass: identityHubRole
 objectClass: accessControlledObject
