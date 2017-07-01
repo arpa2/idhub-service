@@ -1,0 +1,16 @@
+# - Config file for the Idhub-service package
+# It defines the following variables
+#  Idhub-service_INCLUDE_DIRS    - include directories for Idhub-service
+#  Idhub-service_LIBRARIES       - libraries to link against (but there are none)
+
+# Compute paths
+get_filename_component(Idhub-service_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+set(Idhub-service_LIB_DIRS "@CONF_LIB_DIRS@")
+set(Idhub-service_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# No libraries as yet
+#
+# set(Idhub-service_LIBRARIES -L${Idhub-service_LIB_DIRS} idhub)
+# set(Idhub-service_STATIC_LIBRARIES ${Idhub-service_LIB_DIRS}/libidhub.a)
+

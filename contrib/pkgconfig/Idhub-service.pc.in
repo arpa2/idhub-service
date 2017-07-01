@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+includedir=${prefix}/include/idhub
+libdir=${prefix}/lib
+
+Name: idhub-service
+Description: ARPA2 Idhub
+Version: @Idhub-service_VERSION@
+URL: https://github.com/arpa2/idhub
+Cflags: -I${includedir}
+Libs: -L${libdir}
