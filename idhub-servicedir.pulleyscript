@@ -16,13 +16,13 @@
 #
 # PSEUDONYMS: Find back-references with seeAlso
 #
-@idhub, AssociatedDomain=dom <- OU=IdentityHub,O=internetwide.org, OU=ServiceDIT, world
+@idhub, AssociatedDomain=dom <- OU=IdentityHub,O=internetwideDOTorg, OU=ServiceDIT, world
 
 Uid:pseudonym  + UidPseudonym:loginacct <- idhub
 
 #TODO# Might check for identityHubUser class
 
-dom,loginacct,pseudonym -> erlang_node ("noname@nonode", "pseudonym")
+dom,loginacct,pseudonym -> erlang_node (tgt="noname@nonode", msg="pseudonym")
 
 
 #
@@ -33,7 +33,7 @@ Uid:aliasName + UidAlias:aliasOrigin <- idhub
 
 #TODO# Might check matching identityHubXXX classes here
 
-dom,aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
+dom,aliasOrigin,aliasName -> erlang_node (tgt="noname@nonode", msg="alias")
 
 
 #
@@ -50,7 +50,7 @@ dom,aliasOrigin,aliasName -> erlang_node ("noname@nonode", "alias")
 Uid:member + UidGroup:group   <- idhub
 Uid:group  + UidMember:member <- idhub
 
-dom,member,group -> erlang_node ("noname@nonode", "group")
+dom,member,group -> erlang_node (tgt="noname@nonode", msg="group")
 
 
 #
@@ -67,23 +67,23 @@ dom,member,group -> erlang_node ("noname@nonode", "group")
 Uid:occupant + UidRole:role           <- idhub
 Uid:role     + UidOccupation:occupant <- idhub
 
-dom,occupant,role -> erlang_node ("noname@nonode", "role")
+dom,occupant,role -> erlang_node (tgt="noname@nonode", msg="role")
 
 
 #
 # COMMUNICATION: Locate each accessControlList next to a uid
 #
 
-Uid:communicator + accessControlList:acl <-- idhub
+Uid:communicator + accessControlList:acl <- idhub
 
-dom,communicator,acl -> erlang_node ("noname@nonode", "communication")
+dom,communicator,acl -> erlang_node (tgt="noname@nonode", msg="communication")
 
 
 #
 # RESOURCE: Locate each accessControlList next to a resourceClassUUID
 #
 
-ResourceClassUUID:class + accessControlList:clsacl <-- idhub
+ResourceClassUUID:class + accessControlList:clsacl <- idhub
 
-dom,class,acl -> erlang_node ("noname@nonode", "resource")
+dom,class,acl -> erlang_node (tgt="noname@nonode", msg="resource")
 
