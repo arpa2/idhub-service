@@ -120,7 +120,7 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.6
 #
 attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.7
         NAME 'uidDecline'
-        DESC 'Reference to a member that we acknowledge in this group'
+        DESC 'Reference to a member that we explicitly do not acknowledge in this group'
 	SUP uid )
 
 # resourceClassUUID describes what a resource looks like in
@@ -188,26 +188,35 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.12
 	MAY ( uidAlias $ uidPseudonym $ uidGroup $ uidRole $ uidOccupant $ uidDecline $
 	      cn $ description $ labeledURI $ seeAlso ) )
 
-# resourceObject is attached to any object that describes a
-# resource.  The additional attributes resourceClassUUID and
-# possibly resourceInstanceUUID are used to describe in detail
-# what the object is about.
+# resourceClass is attached to an object that describes a
+# resource class.  The additional attributes resourceClassUUID
+# holds an UUID that identifies an application statically.
 #
-# It makes no sense to specify a resourceInstanceUUID with also
-# indicating the containing resourceClassUUID, so this is not
-# permitted; without either, this additional class is also not
-# very helpful.
-#
-# Very often, a resourceObject will be an accessControlledObject,
+# Very often, a resourceClass is an accessControlledObject,
 # but this is not required and certainly not enforced.
 #
 objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.15
-        NAME 'resourceObject'
-        DESC 'A description of a resource'
+        NAME 'resourceClass'
+        DESC 'A description of a resource class'
 	AUXILIARY
 	MUST ( resourceClassUUID )
-        MAY ( resourceInstanceUUID $
-	      cn $ description $ labeledURI $ seeAlso ) )
+        MAY ( cn $ description $ labeledURI $ seeAlso ) )
+
+# resourceInstance is attached to an object that describes a
+# resource instance.  The additional attribute resourceClassUUID
+# holds an UUID that identifies an application statically, and
+# resourceInstanceUUID holds an UUID that identifies a possibly
+# dynamic instance of the resource class.
+#
+# Very often, a resourceInstance is an accessControlledObject,
+# but this is not required and certainly not enforced.
+#
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.16
+        NAME 'resourceInstance'
+        DESC 'A description of a resource instance'
+	AUXILIARY
+	MUST ( resourceClassUUID $ resourceInstanceUUID )
+        MAY ( cn $ description $ labeledURI $ seeAlso ) )
 
 # resourceRequirement is a reference from an object to a
 # resourceObject that it requires.  The reference is made
@@ -218,7 +227,7 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.15
 # application to decide whether these should be setup on the
 # referencing or referred object(s), or both.
 #
-objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.16
+objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.17
         NAME 'resourceRequirement'
         DESC 'A link to a required resourceObject'
 	AUXILIARY
@@ -268,6 +277,28 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.20
 # any concrete application.
 #
 #RESERVED# attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.21 ...)
+
+# accessToken contains an octet string that clients can use
+# to access a resource.  This will often combine with
+# accessControl settings, which would then determine the
+# parties to which the token may be released.
+#
+# It is generally a Bad Idea(tm) to supply end users with
+# this token, because it works like a bearer token (grants
+# access to bearer) and is thus dangerous when stolen.
+# It is invariably better to derive a short-term access
+# token, or to encrypt it with a limited usage time.
+#
+# The format of an accessToken is unspecified.  It may well
+# be a combination of a username and password (or identifier
+# and access token) for an application demanding that.
+#
+#
+attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.22
+	NAME 'accessToken'
+	DESC 'Opaque token that can be used internally to grant access'
+	EQUALITY octetStringMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 )
 
 
 # accessControlledObject is any object that employs
