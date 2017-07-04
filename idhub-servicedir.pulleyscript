@@ -16,7 +16,7 @@
 #
 # PSEUDONYMS: Find back-references with seeAlso
 #
-@idhub, AssociatedDomain=dom <- OU=IdentityHub,O=internetwideDOTorg, OU=ServiceDIT, world
+AssociatedDomain:dom, @idhub <- OU=IdentityHub,O=internetwideDOTorg, OU=ServiceDIT, world
 
 Uid:pseudonym  + UidPseudonym:loginacct <- idhub
 
