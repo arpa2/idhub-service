@@ -20,14 +20,14 @@ olcAttributeTypes: {7}( 1.3.6.1.4.1.44469.666.389.1.3.8 NAME 'resourceClassUUI
  D' DESC 'The UUID value for a resource class' EQUALITY uuidMatch ORDERING uui
  dOrderingMatch SYNTAX 1.3.6.1.1.16.1 SINGLE-VALUE )
 olcAttributeTypes: {8}( 1.3.6.1.4.1.44469.666.389.1.3.9 NAME 'resourceInstance
- UUID' DESC 'The UUID value for a resource instance' EQUALITY uuidMatch ORDERI
- NG uuidOrderingMatch SYNTAX 1.3.6.1.1.16.1 )
+ Key' DESC 'The binary key for a resource instance' EQUALITY octetStringMatch 
+ ORDERING octetStringOrderingMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 )
 olcAttributeTypes: {9}( 1.3.6.1.4.1.44469.666.389.1.3.20 NAME 'accessControlLi
  st' DESC 'ACL description in "lineno level[ selector...]" format' EQUALITY ca
  seIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 )
 olcAttributeTypes: {10}( 1.3.6.1.4.1.44469.666.389.1.3.22 NAME 'accessToken' D
- ESC 'Opaque token that can be used internally to grant access' EQUALITY octet
- StringMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 )
+ ESC 'Opaque bearer token that can be used to grant access' EQUALITY octetStri
+ ngMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 SINGLE-VALUE )
 olcObjectClasses: {0}( 1.3.6.1.4.1.44469.666.389.1.3.10 NAME 'identityHubUser'
   DESC 'An individual identity under the IdentityHub Component of the Internet
  Wide Architecture' SUP top STRUCTURAL MUST uid MAY ( uidAlias $ uidPseudonym 
@@ -48,18 +48,17 @@ olcObjectClasses: {3}( 1.3.6.1.4.1.44469.666.389.1.3.15 NAME 'resourceClass' D
  ( cn $ description $ labeledURI $ seeAlso ) )
 olcObjectClasses: {4}( 1.3.6.1.4.1.44469.666.389.1.3.16 NAME 'resourceInstance
  ' DESC 'A description of a resource instance' AUXILIARY MUST ( resourceClassU
- UID $ resourceInstanceUUID ) MAY ( cn $ description $ labeledURI $ seeAlso ) 
- )
+ UID $ resourceInstanceKey ) MAY ( cn $ description $ labeledURI $ seeAlso ) )
 olcObjectClasses: {5}( 1.3.6.1.4.1.44469.666.389.1.3.17 NAME 'resourceRequirem
  ent' DESC 'A link to a required resourceObject' AUXILIARY MUST resourceClassU
- UID MAY resourceInstanceUUID )
+ UID MAY resourceInstanceKey )
 olcObjectClasses: {6}( 1.3.6.1.4.1.44469.666.389.1.3.29 NAME 'accessControlled
  Object' DESC 'An object that may or resides under access control' AUXILIARY M
- UST accessControlList )
+ UST accessControlList MAY accessToken )
 structuralObjectClass: olcSchemaConfig
-entryUUID: ff2aa498-f34b-1036-966c-535f2d9f4fc9
+entryUUID: 7997253a-f450-1036-91ea-53b05d82eb26
 creatorsName: cn=config
-createTimestamp: 20170702082714Z
-entryCSN: 20170702082714.641623Z#000000#000#000000
+createTimestamp: 20170703153149Z
+entryCSN: 20170703153149.185342Z#000000#000#000000
 modifiersName: cn=config
-modifyTimestamp: 20170702082714Z
+modifyTimestamp: 20170703153149Z

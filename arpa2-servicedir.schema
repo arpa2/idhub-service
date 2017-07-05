@@ -137,7 +137,7 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.8
 	SYNTAX 1.3.6.1.1.16.1
 	SINGLE-VALUE )
 
-# resourceInstanceUUID describes an instance code, always
+# resourceInstance describes an instance key, always
 # within the scope of a given resourceClassUUID.
 #
 # When used extensively to distinguish within any given
@@ -145,11 +145,11 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.8
 # candidate for equality indexing.
 #
 attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.9
-        NAME 'resourceInstanceUUID'
-        DESC 'The UUID value for a resource instance'
-	EQUALITY uuidMatch
-	ORDERING uuidOrderingMatch
-	SYNTAX 1.3.6.1.1.16.1 )
+        NAME 'resourceInstanceKey'
+        DESC 'The binary key for a resource instance'
+	EQUALITY octetStringMatch
+	ORDERING octetStringOrderingMatch
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 )
 
 
 # identityHubUser is an object that describes users, as in, individuals.
@@ -205,8 +205,8 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.15
 # resourceInstance is attached to an object that describes a
 # resource instance.  The additional attribute resourceClassUUID
 # holds an UUID that identifies an application statically, and
-# resourceInstanceUUID holds an UUID that identifies a possibly
-# dynamic instance of the resource class.
+# resourceInstanceKey holds an binary key that identifies a
+# possibly dynamic instance of the resource class.
 #
 # Very often, a resourceInstance is an accessControlledObject,
 # but this is not required and certainly not enforced.
@@ -215,7 +215,7 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.16
         NAME 'resourceInstance'
         DESC 'A description of a resource instance'
 	AUXILIARY
-	MUST ( resourceClassUUID $ resourceInstanceUUID )
+	MUST ( resourceClassUUID $ resourceInstanceKey )
         MAY ( cn $ description $ labeledURI $ seeAlso ) )
 
 # resourceRequirement is a reference from an object to a
@@ -232,7 +232,7 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.17
         DESC 'A link to a required resourceObject'
 	AUXILIARY
 	MUST ( resourceClassUUID )
-        MAY ( resourceInstanceUUID ) )
+        MAY ( resourceInstanceKey ) )
 
 
 # accessControlList describes a number of properties in a
@@ -284,10 +284,12 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.20
 # parties to which the token may be released.
 #
 # It is generally a Bad Idea(tm) to supply end users with
-# this token, because it works like a bearer token (grants
+# static accessTokens, which work like bearer tokens (grant
 # access to bearer) and is thus dangerous when stolen.
-# It is invariably better to derive a short-term access
-# token, or to encrypt it with a limited usage time.
+# The Internet does not need new words for the same old
+# password mechanisms!  It is much more secure to derive a
+# short-lived access token, or to encrypt the accessToken
+# in a form with a limited usage time.
 #
 # The format of an accessToken is unspecified.  It may well
 # be a combination of a username and password (or identifier
@@ -296,9 +298,10 @@ attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.20
 #
 attributetype ( 1.3.6.1.4.1.44469.666.389.1.3.22
 	NAME 'accessToken'
-	DESC 'Opaque token that can be used internally to grant access'
+	DESC 'Opaque bearer token that can be used to grant access'
 	EQUALITY octetStringMatch
-	SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 )
+	SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+	SINGLE-VALUE )
 
 
 # accessControlledObject is any object that employs
@@ -310,5 +313,6 @@ objectclass ( 1.3.6.1.4.1.44469.666.389.1.3.29
         NAME 'accessControlledObject'
         DESC 'An object that may or resides under access control'
 	AUXILIARY
-        MUST ( accessControlList ) )
+        MUST ( accessControlList )
+	MAY ( accessToken ) )
 
