@@ -15,6 +15,10 @@
 -- From: Rick van Rein <rick@openfortress.nl>
 
 
+-- TODO: There is nothing to check synchronicity between sender and receiever
+-- TODO: We could assign queriable OCTET STRING identifiers to commits
+
+
 PulleyBack DEFINITIONS EXPLICIT TAGS ::=
 
 BEGIN
@@ -81,7 +85,7 @@ PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 	-- We always start with version information, but only
 	-- one.
 	--
-	-- Upon receiving a bad version, the receiver ignores
+	-- Upon receiving a bad version, the recipient ignores
 	-- the message but, having taken it in and thereby
 	-- made it possible for others to pick it up, sends a
 	-- result which enumerates all the versions it is
@@ -94,25 +98,31 @@ PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 	-- of the protocol, to take in the message.  Relying
 	-- on that can be enough to support graceful changes
 	-- to protocol versions, by running tools in parallel
-	-- attached the same transport infrastructure.
+	-- attached to the same transport infrastructure.
 	--
-	version PulleyVersionInfo,
-	payload CHOICE {
+	version [0] PulleyVersionInfo,
+	payload [1] CHOICE {
 		--
 		-- Use decision to relay commit or rollback,
 		-- leaving no (more) choice to the recipient.
 		-- There will be no response from the receiver.
 		--
-		enforce PulleySecondPhase --commit or rollback--,
+		enforce [10] PulleySecondPhase --commit or rollback--,
 		--
 		-- Use propose to relay commands and request a
-		-- final action on them.  The receiver has a
+		-- final action on them.  The recipient has a
 		-- choice in whether it will comply, and it will
 		-- send a response to relay its suggestion.
 		--
-		propose SEQUENCE {
-			transact PulleyTransaction,
-			request  PulleySecondPhase --commit or prepare--
+		-- The restart flag indicates that the transaction
+		-- starts from an empty situation.  This may be
+		-- used when the sender and receiver have lost
+		-- sync.
+		--
+		propose [11] SEQUENCE {
+			restart [0] BOOLEAN DEFAULT FALSE,
+			actions [1] PulleyTransaction,
+			request [2] PulleySecondPhase --commit or prepare--
 		}
 	}
 }
