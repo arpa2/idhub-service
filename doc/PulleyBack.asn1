@@ -36,9 +36,19 @@ BEGIN
 -- can be used to send alternatives, or merely to require
 -- the recipient's agreement.
 --
+-- The txstate is absent when the initial state is an
+-- empty configuration.  Note that all receivers should
+-- be able to restart from the empty configuration, so
+-- it will then match every backend, but senders will
+-- usually prefer to work with a better matching recipient.
+-- In terms of comparison rules, the contents of the
+-- IMPLICIT SEQUENCE can be matched by a receiver where
+-- the length to match is determined by the sender.
+--
 PulleyVersionInfo ::= [APPLICATION 0] IMPLICIT SEQUENCE {
 	context [0] OID,
-	version [1] INTEGER
+	version [1] INTEGER,
+	txstate [2] OCTET STRING OPTIONAL
 }
 
 -- PulleyCommands add or delete tuples in a target set
@@ -47,8 +57,8 @@ PulleyVersionInfo ::= [APPLICATION 0] IMPLICIT SEQUENCE {
 PulleyCommand ::= SEQUENCE {
 	target [0] IA5STRING,
 	change [1] ENUMERATED {
-			add-tuple,
-			del-tuple
+			del-tuple(0),
+			add-tuple(1)
 	},
 	values [2] SEQUENCE OF OCTET STRING
 }
@@ -58,8 +68,10 @@ PulleyCommand ::= SEQUENCE {
 -- but when prepare is TRUE, it will instead wait for a
 -- separate commit or rollback message.
 --
-PulleyTransaction ::= [APPLICATION 1] IMPLICIT SEQUENCE OF
-	PulleyCommand
+PulleyTransaction ::= [APPLICATION 1] IMPLICIT SEQUENCE {
+	prestate [0] OCTET STRING,
+	commands [1] SEQUENCE OF PulleyCommand
+}
 
 -- PulleySecondPhase is the outcome of a two-phase commit
 -- transaction, which usually involves multiple recipients
@@ -72,7 +84,8 @@ PulleySecondPhase ::= [APPLICATION 2] IMPLICIT SEQUENCE {
 		prepare(0),
 		commit(1),
 		rollback(2)
-	}
+	},
+	poststate [1] OCTET STRING
 }
 
 -- Assume a transport that accepts any message size, and group
@@ -103,11 +116,20 @@ PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 	version [0] PulleyVersionInfo,
 	payload [1] CHOICE {
 		--
+		-- Ask for a client that can start from the
+		-- transaction state and other version info.
+		--
+		-- This field is TRUE when clients are
+		-- requested to propose alternatives that
+		-- represent their version information.
+		--
+		inquire [10] BOOLEAN,
+		--
 		-- Use decision to relay commit or rollback,
 		-- leaving no (more) choice to the recipient.
 		-- There will be no response from the receiver.
 		--
-		enforce [10] PulleySecondPhase --commit or rollback--,
+		enforce [11] PulleySecondPhase --commit or rollback--,
 		--
 		-- Use propose to relay commands and request a
 		-- final action on them.  The recipient has a
@@ -119,10 +141,10 @@ PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 		-- used when the sender and receiver have lost
 		-- sync.
 		--
-		propose [11] SEQUENCE {
-			restart [0] BOOLEAN DEFAULT FALSE,
-			actions [1] PulleyTransaction,
-			request [2] PulleySecondPhase --commit or prepare--
+		propose [12] SEQUENCE {
+			restart [20] BOOLEAN DEFAULT FALSE,
+			actions [21] PulleyTransaction,
+			request [22] PulleySecondPhase --commit or prepare--
 		}
 	}
 }
