@@ -71,18 +71,13 @@ PulleySecondPhase ::= [APPLICATION 2] IMPLICIT ENUMERATED {
 -- logical unit of work, and be helpful with acceptance and
 -- rejection of the work.
 --
-PulleyBackMessage ::= SEQUENCE {
+PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 	--
 	-- We always start with version information, but only
-	-- one.  When no response arrives, there is a mismatch
-	-- between versions.  The recipient should respond to
-	-- a false version with a failure response (rollback)
-	-- including the version that it can process.  Any
-	-- party that can process multiple versions may choose
-	-- to send them all, until eventually one filters out.
-	-- The active feedback from the recipient on version
-	-- mismatches should prove helpful to learn about it
-	-- if no response may be expected.  TODO:watertight?
+	-- one.  Upon receiving a bad version, the receiver
+	-- ignores the message (but otherwise takes it in) and
+	-- sends a result which enumerates all the versions it
+	-- is willing to entertain.
 	--
 	version PulleyVersionInfo,
 	action  CHOICE {
@@ -105,12 +100,17 @@ PulleyBackMessage ::= SEQUENCE {
 	}
 }
 
-PulleyBackResults ::= SEQUENCE {
+PulleyBackResults ::= [APPLICATION 11] IMPLICIT SEQUENCE {
 	--
 	-- Since a response may indicate incompatibility with
 	-- a sender's versions, it ought to contain a complete
 	-- set of available versions.  The sender can then
 	-- exhaustively search for overlap.
+	--
+	-- It is possible to reduce the set to just one version
+	-- that has shown to work between the two parties;
+	-- specifically, when such a version is mentioned in
+	-- the message for which this provides the results.
 	--
 	versions SET OF PulleyVersionInfo,
 	--
@@ -131,8 +131,8 @@ PulleyBackResults ::= SEQUENCE {
 --      - insert a to-be-matched initial word in maxlen frames
 --
 PulleyBackTransportUnit ::= CHOICE {
-	master-to-slave [0] PulleyBackMessage,
-	slave-to-master [1] PulleyBackResults
+	master-to-slave PulleyBackMessage,
+	slave-to-master PulleyBackResults
 }
 
 END
