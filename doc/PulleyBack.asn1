@@ -1,0 +1,79 @@
+-- The PulleyBack module defines that command format that is sent from the
+-- Pulley backend, through Quick DER, over AMQP 1.0, to components that should
+-- respond to updates in LDAP configuration.  The resulting protocol is simple
+-- and can be quickly turned into local configuration changes, and does not
+-- require a local LDAP client.  Also, it means that several cross-related
+-- changes can be coordinated from the Pulley Backend on a site.
+--
+-- This could be a serious alternative for the function for which we devised
+-- the SteamWorks Shaft component - namely, to retain a consistent per-site
+-- configuration and yet configurat various components.
+--
+-- From: Rick van Rein <rick@openfortress.nl>
+
+
+PulleyBack DEFINITIONS EXPLICIT TAGS ::=
+
+BEGIN
+
+-- PulleyVersionInfo can be used at any place to select a
+-- target protocol by OID, and its protocol version as an
+-- integer number.  This structure can be matched literally
+-- when sent in a canonical format such as DER or CER, but
+-- keep in mind that in-depth analysis is required for
+-- other on-the-wire encodings, such as BER, XML and JSON.
+--
+-- The range over which this version info applies is
+-- any data structure following it in the same transmission,
+-- ending at the next PulleyVersionInfo.  So this field
+-- can be used to send alternatives, or merely to require
+-- the recipient's agreement.
+--
+PulleyVersionInfo ::= [APPLICATION 0] SEQUENCE {
+	context [0] OID,
+	version [1] INTEGER
+}
+
+-- PulleyCommands add or delete tuples in a target set
+-- namely the values that are provided, also for delete.
+--
+PulleyCommand ::= SEQUENCE {
+	target [0] IA5STRING,
+	change [1] ENUMERATED {
+			add-tuple,
+			del-tuple
+	},
+	values [2] SEQUENCE OF OCTETSTRING
+}
+
+-- PulleyTransactions combine any number of PulleyCommands
+-- into one overall change; it is autocommitted by default,
+-- but when prepare is TRUE, it will instead wait for a
+-- separate commit or rollback message.
+--
+PulleyTransaction ::= [APPLICATION 1] SEQUENCE {
+	prepare [0] BOOLEAN DEFAULT FALSE,
+	actions [1] SEQUENCE OF PulleyCommand
+}
+
+-- PulleySecondPhase is the outcome of a two-phase commit
+-- transaction, which usually involves multiple recipients
+-- that all need to succeed in preparing before a light
+-- commit can be made out of the preparation; if one fails,
+-- the second phase will instead be a rollback
+--
+PulleySecondPhase ::= [APPLICATION 2] ENUMERATED {
+	commit,
+	rollback
+}
+
+-- A message in the AMQP 1.0 sense holds one PulleyTransaction
+-- and we use the ack system to hand back processing responses.
+--
+MessageAMQP ::= SEQUENCE OF CHOICE {
+	version  PulleyVersionInfo,
+	transact PulleyTransaction,
+	decision PulleySecondPhase
+}
+
+END
