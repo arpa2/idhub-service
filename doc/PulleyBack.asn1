@@ -1,9 +1,12 @@
 -- The PulleyBack module defines that command format that is sent from the
--- Pulley backend, through Quick DER, over AMQP 1.0, to components that should
--- respond to updates in LDAP configuration.  The resulting protocol is simple
--- and can be quickly turned into local configuration changes, and does not
--- require a local LDAP client.  Also, it means that several cross-related
--- changes can be coordinated from the Pulley Backend on a site.
+-- Pulley backend, through Quick DER, over AMQP 1.0 or other transports,
+-- to components that should respond to updates in LDAP configuration.
+--
+-- The resulting protocol is simple and can be quickly turned into local
+-- configuration changes, possibly after mapping back to the same API
+-- as the SteamWorks Pulley defines for its backend - in which case this
+-- protocol collates and proxies transactions from the Pulley to any
+-- number of following hosts that it coordinates, all in one transaction.
 --
 -- This could be a serious alternative for the function for which we devised
 -- the SteamWorks Shaft component - namely, to retain a consistent per-site
@@ -43,7 +46,7 @@ PulleyCommand ::= SEQUENCE {
 			add-tuple,
 			del-tuple
 	},
-	values [2] SEQUENCE OF OCTETSTRING
+	values [2] SEQUENCE OF OCTET STRING
 }
 
 -- PulleyTransactions combine any number of PulleyCommands
@@ -60,10 +63,12 @@ PulleyTransaction ::= [APPLICATION 1] IMPLICIT SEQUENCE OF
 -- commit can be made out of the preparation; if one fails,
 -- the second phase will instead be a rollback
 --
-PulleySecondPhase ::= [APPLICATION 2] IMPLICIT ENUMERATED {
-	prepare(0),
-	commit(1),
-	rollback(2)
+PulleySecondPhase ::= [APPLICATION 2] IMPLICIT SEQUENCE {
+	tx-result [0] ENUMERATED {
+		prepare(0),
+		commit(1),
+		rollback(2)
+	}
 }
 
 -- Assume a transport that accepts any message size, and group
@@ -74,13 +79,25 @@ PulleySecondPhase ::= [APPLICATION 2] IMPLICIT ENUMERATED {
 PulleyBackMessage ::= [APPLICATION 10] IMPLICIT SEQUENCE {
 	--
 	-- We always start with version information, but only
-	-- one.  Upon receiving a bad version, the receiver
-	-- ignores the message (but otherwise takes it in) and
-	-- sends a result which enumerates all the versions it
-	-- is willing to entertain.
+	-- one.
+	--
+	-- Upon receiving a bad version, the receiver ignores
+	-- the message but, having taken it in and thereby
+	-- made it possible for others to pick it up, sends a
+	-- result which enumerates all the versions it is
+	-- willing to entertain.
+	--
+	-- This procedure is not required for all transports;
+	-- in AMQP 1.0 it is possible to not accept a message
+	-- that a receiver has been considering.  This allows
+	-- other recipients, perhaps running another version
+	-- of the protocol, to take in the message.  Relying
+	-- on that can be enough to support graceful changes
+	-- to protocol versions, by running tools in parallel
+	-- attached the same transport infrastructure.
 	--
 	version PulleyVersionInfo,
-	action  CHOICE {
+	payload CHOICE {
 		--
 		-- Use decision to relay commit or rollback,
 		-- leaving no (more) choice to the recipient.
@@ -112,7 +129,7 @@ PulleyBackResults ::= [APPLICATION 11] IMPLICIT SEQUENCE {
 	-- specifically, when such a version is mentioned in
 	-- the message for which this provides the results.
 	--
-	versions SET OF PulleyVersionInfo,
+	versions SET OF PulleyVersionInfo --not empty--,
 	--
 	-- When a proposal was sent, the recipient should
 	-- respond with what it believes is necessary as the
@@ -124,11 +141,7 @@ PulleyBackResults ::= [APPLICATION 11] IMPLICIT SEQUENCE {
 -- PulleyBack frames may be transported over various transports:
 --   * TCP can prefix frames with a DER header or 32-bit length
 --   * AMQP 1.0 can hold any size of message (same for 0-9-1)
---   * SCTP can connect frames using any of:
---      - send only continued frames with in-order delivery
---      - insert a last-byte mark of completion in maxlen frames
---      - insert a total-size in the start of a maxlen frame
---      - insert a to-be-matched initial word in maxlen frames
+--   * SCTP has B/E flags to recombine fragmented user messages
 --
 PulleyBackTransportUnit ::= CHOICE {
 	master-to-slave PulleyBackMessage,
