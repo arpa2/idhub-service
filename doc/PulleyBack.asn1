@@ -29,7 +29,7 @@ BEGIN
 -- can be used to send alternatives, or merely to require
 -- the recipient's agreement.
 --
-PulleyVersionInfo ::= [APPLICATION 0] SEQUENCE {
+PulleyVersionInfo ::= [APPLICATION 0] IMPLICIT SEQUENCE {
 	context [0] OID,
 	version [1] INTEGER
 }
@@ -51,10 +51,8 @@ PulleyCommand ::= SEQUENCE {
 -- but when prepare is TRUE, it will instead wait for a
 -- separate commit or rollback message.
 --
-PulleyTransaction ::= [APPLICATION 1] SEQUENCE {
-	prepare [0] BOOLEAN DEFAULT FALSE,
-	actions [1] SEQUENCE OF PulleyCommand
-}
+PulleyTransaction ::= [APPLICATION 1] IMPLICIT SEQUENCE OF
+	PulleyCommand
 
 -- PulleySecondPhase is the outcome of a two-phase commit
 -- transaction, which usually involves multiple recipients
@@ -62,18 +60,79 @@ PulleyTransaction ::= [APPLICATION 1] SEQUENCE {
 -- commit can be made out of the preparation; if one fails,
 -- the second phase will instead be a rollback
 --
-PulleySecondPhase ::= [APPLICATION 2] ENUMERATED {
-	commit,
-	rollback
+PulleySecondPhase ::= [APPLICATION 2] IMPLICIT ENUMERATED {
+	prepare(0),
+	commit(1),
+	rollback(2)
 }
 
--- A message in the AMQP 1.0 sense holds one PulleyTransaction
--- and we use the ack system to hand back processing responses.
+-- Assume a transport that accepts any message size, and group
+-- many changes together in one message.  This would provide a
+-- logical unit of work, and be helpful with acceptance and
+-- rejection of the work.
 --
-MessageAMQP ::= SEQUENCE OF CHOICE {
-	version  PulleyVersionInfo,
-	transact PulleyTransaction,
-	decision PulleySecondPhase
+PulleyBackMessage ::= SEQUENCE {
+	--
+	-- We always start with version information, but only
+	-- one.  When no response arrives, there is a mismatch
+	-- between versions.  The recipient should respond to
+	-- a false version with a failure response (rollback)
+	-- including the version that it can process.  Any
+	-- party that can process multiple versions may choose
+	-- to send them all, until eventually one filters out.
+	-- The active feedback from the recipient on version
+	-- mismatches should prove helpful to learn about it
+	-- if no response may be expected.  TODO:watertight?
+	--
+	version PulleyVersionInfo,
+	action  CHOICE {
+		--
+		-- Use decision to relay commit or rollback,
+		-- leaving no (more) choice to the recipient.
+		-- There will be no response from the receiver.
+		--
+		enforce PulleySecondPhase --commit or rollback--,
+		--
+		-- Use propose to relay commands and request a
+		-- final action on them.  The receiver has a
+		-- choice in whether it will comply, and it will
+		-- send a response to relay its suggestion.
+		--
+		propose SEQUENCE {
+			transact PulleyTransaction,
+			request  PulleySecondPhase --commit or prepare--
+		}
+	}
+}
+
+PulleyBackResults ::= SEQUENCE {
+	--
+	-- Since a response may indicate incompatibility with
+	-- a sender's versions, it ought to contain a complete
+	-- set of available versions.  The sender can then
+	-- exhaustively search for overlap.
+	--
+	versions SET OF PulleyVersionInfo,
+	--
+	-- When a proposal was sent, the recipient should
+	-- respond with what it believes is necessary as the
+	-- next step.
+	--
+	response PulleySecondPhase --commit or rollback--
+}
+
+-- PulleyBack frames may be transported over various transports:
+--   * TCP can prefix frames with a DER header or 32-bit length
+--   * AMQP 1.0 can hold any size of message (same for 0-9-1)
+--   * SCTP can connect frames using any of:
+--      - send only continued frames with in-order delivery
+--      - insert a last-byte mark of completion in maxlen frames
+--      - insert a total-size in the start of a maxlen frame
+--      - insert a to-be-matched initial word in maxlen frames
+--
+PulleyBackTransportUnit ::= CHOICE {
+	master-to-slave [0] PulleyBackMessage,
+	slave-to-master [1] PulleyBackResults
 }
 
 END
